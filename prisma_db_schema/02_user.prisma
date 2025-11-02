@@ -1,0 +1,18 @@
+// Core user table storing all user accounts.
+model User {
+  id        String   @id @default(uuid()) @db.Uuid @map("id")
+  username  String   @unique @map("username")
+  name      String   @map("name")
+  bio       String?  @map("bio")
+  avatarUrl String?  @map("avatar_url")
+  email     String   @unique @map("email")
+  role      String   @default("user") @map("role")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime? @map("updated_at")
+
+  // relations
+  following Following[] @relation("following_user")
+  followers Following[] @relation("followed_user")
+
+  @@map("users")
+}
