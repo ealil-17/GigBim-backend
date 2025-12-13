@@ -23,6 +23,20 @@ model User {
   role      String   @default("user") @map("role")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime? @map("updated_at")
+  aiLogs    AiLog[]
 
   @@map("users")
+}
+
+
+model AiLog {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid @map("user_id")
+  prompt    String
+  response  String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("ai_logs")
 }

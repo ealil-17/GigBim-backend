@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import OpenAI from 'openai';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class AiModelService {
     private openai: OpenAI;
 
-    constructor() {
+    constructor(private prisma: PrismaService) {
         this.openai = new OpenAI({
             apiKey: process.env.OPENAI_API_KEY,
         });
@@ -27,6 +28,17 @@ export class AiModelService {
             model: 'gpt-3.5-turbo',
         });
 
-        return completion.choices[0].message.content || 'No response from AI';
+        const responseContent = completion.choices[0].message.content || 'No response from AI';
+
+        // Store the interaction in the database
+        await this.prisma.aiLog.create({
+            data: {
+                userId: user.id,
+                prompt: prompt,
+                response: responseContent,
+            },
+        });
+
+        return responseContent;
     }
 }
