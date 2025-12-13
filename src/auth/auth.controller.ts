@@ -39,22 +39,4 @@ export class AuthController {
         console.log("Result: ",result);
 		return result;
 	}
-
-	@Post('google/token')
-	@Public()
-	@ApiOperation({ 
-		summary: 'Authenticate with Google ID Token',
-		description: 'For mobile clients to authenticate using Google ID token' 
-	})
-	@ApiBody({ type: AndroidTokenDto })
-	@ApiOkResponse({ type: GoogleCallbackResponseDto })
-	async authenticateAndroid(@Body() body: AndroidTokenDto) {
-		const result = await this.authService.validateIdToken(body.idToken);
-		return result;
-	}
-
-	// Example: admin-only endpoint usage
-	// @Get('admin-only')
-	// @Admin()
-	// someAdminHandler() { ... }
 }

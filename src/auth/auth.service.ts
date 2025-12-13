@@ -45,37 +45,4 @@ export class AuthService {
 
 		return { user, token };
 	}
-
-	// New: verify Google idToken coming from Android client and return { user, token }
-	async validateIdToken(idToken: string) {
-		if (!idToken) {
-			throw new UnauthorizedException('Missing idToken');
-		}
-
-		const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-		let ticket;
-		try {
-			ticket = await client.verifyIdToken({
-				idToken,
-				audience: process.env.GOOGLE_CLIENT_ID,
-			});
-		} catch (err) {
-			throw new UnauthorizedException('Invalid Google idToken');
-		}
-
-		const payload = ticket.getPayload();
-		if (!payload || !payload.email) {
-			throw new UnauthorizedException('Invalid token payload');
-		}
-
-		// build a profile-like object that validateOAuthLogin expects
-		const profileLike = {
-			emails: [{ value: payload.email }],
-			displayName: payload.name || payload.email.split('@')[0],
-			photos: payload.picture ? [{ value: payload.picture }] : [],
-		};
-
-		// reuse existing logic to find-or-create user and issue jwt
-		return this.validateOAuthLogin(profileLike);
-	}
 }

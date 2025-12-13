@@ -8,6 +8,8 @@ async function bootstrap() {
   // Set global prefix for all routes
   app.setGlobalPrefix('api');
 
+  app.enableCors();
+
   // Swagger / OpenAPI setup
   const config = new DocumentBuilder()
     .setTitle('nestjs-starter API')

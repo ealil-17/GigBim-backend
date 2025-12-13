@@ -6,14 +6,14 @@ import { UserController } from './user/user.controller';
 import { UserService } from './user/user.service';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
-import { S3Module } from './s3/s3.module';
+import { AiModelModule } from './ai-model/ai-model.module';
 
 @Module({
   imports: [
     PrismaModule,
     UserModule,
     AuthModule,
-    S3Module,
+    AiModelModule,
   ],
   controllers: [AppController, UserController],
   providers: [AppService, UserService],
