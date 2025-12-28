@@ -37,7 +37,7 @@ services:
         condition: service_healthy
     networks:
       - gigbim-network
-    command: sh -c "npx prisma migrate deploy && node dist/main"
+    command: sh -c "npx prisma migrate dev && node dist/main"
 
 networks:
   gigbim-network:
