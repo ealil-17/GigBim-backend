@@ -5,6 +5,8 @@ import { AndroidTokenResponseDto, GoogleCallbackResponseDto } from './dto/swagge
 import { AndroidTokenDto } from './dto/authenticate-android';
 import { ValidateTokenRequestDto, ValidateTokenResponseDto } from './dto/validate-token.dto';
 import { DevLoginRequestDto, DevLoginResponseDto } from './dto/dev-login.dto';
+import { SignupRequestDto, SignupResponseDto } from './dto/signup.dto';
+import { LoginRequestDto, LoginResponseDto } from './dto/login.dto';
 import { AuthService } from './auth.service';
 import { Public } from '../common/decorators/public.decorator';
 
@@ -64,5 +66,29 @@ export class AuthController {
 	@ApiOkResponse({ type: DevLoginResponseDto })
 	async devLogin(@Body() dto: DevLoginRequestDto) {
 		return this.authService.devLogin(dto);
+	}
+
+	@Post('signup')
+	@Public()
+	@ApiOperation({
+		summary: 'User Signup',
+		description: 'Create a new user account'
+	})
+	@ApiBody({ type: SignupRequestDto })
+	@ApiOkResponse({ type: SignupResponseDto })
+	async signup(@Body() dto: SignupRequestDto) {
+		return this.authService.signup(dto);
+	}
+
+	@Post('login')
+	@Public()
+	@ApiOperation({
+		summary: 'User Login',
+		description: 'Login with email and password'
+	})
+	@ApiBody({ type: LoginRequestDto })
+	@ApiOkResponse({ type: LoginResponseDto })
+	async login(@Body() dto: LoginRequestDto) {
+		return this.authService.login(dto);
 	}
 }

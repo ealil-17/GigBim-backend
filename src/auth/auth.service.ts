@@ -1,16 +1,20 @@
-import { Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { PrismaClient } from '@prisma/client';
+import { PrismaService } from '../prisma/prisma.service';
 // New import
 import { OAuth2Client } from 'google-auth-library';
+import * as bcrypt from 'bcryptjs';
 import { ValidateTokenRequestDto, ValidateTokenResponseDto } from './dto/validate-token.dto';
 import { DevLoginRequestDto } from './dto/dev-login.dto';
+import { SignupRequestDto, SignupResponseDto } from './dto/signup.dto';
+import { LoginRequestDto, LoginResponseDto } from './dto/login.dto';
 
 @Injectable()
 export class AuthService {
-	private prisma = new PrismaClient();
-
-	constructor(private readonly jwtService: JwtService) { }
+	constructor(
+		private readonly jwtService: JwtService,
+		private readonly prisma: PrismaService,
+	) { }
 
 	// Find existing user by email or create a new one, then return a jwt + user
 	async validateOAuthLogin(profile: any) {
@@ -123,6 +127,60 @@ export class AuthService {
 		const token = this.jwtService.sign(payload);
 
 		return { user, token };
+	}
+
+	async signup(dto: SignupRequestDto): Promise<SignupResponseDto> {
+		const { username, email, password } = dto;
+
+		const existingUser = await this.prisma.user.findFirst({
+			where: {
+				OR: [
+					{ email },
+					{ username }
+				]
+			}
+		});
+
+		if (existingUser) {
+			throw new BadRequestException('User with this email or username already exists');
+		}
+
+		const hashedPassword = await bcrypt.hash(password, 10);
+
+		await this.prisma.user.create({
+			data: {
+				username,
+				email,
+				name: username, // Default name to username since it's required but not in DTO
+				password: hashedPassword,
+			}
+		});
+
+		return { message: 'User created successfully' };
+	}
+
+	async login(dto: LoginRequestDto): Promise<LoginResponseDto> {
+		const { email, password } = dto;
+		const user = await this.prisma.user.findUnique({ where: { email } });
+
+		if (!user) {
+			throw new UnauthorizedException('User not found. Please sign up');
+		}
+
+		if (null == user.password) {
+			throw new UnauthorizedException('Invalid credentials');
+		}
+
+		const isPasswordValid = await bcrypt.compare(password, user.password);
+
+		if (!isPasswordValid) {
+			throw new UnauthorizedException('Invalid credentials');
+		}
+
+		const payload = { sub: user.id, email: user.email, role: user.role };
+		const token = this.jwtService.sign(payload);
+
+		return { token, message: 'Login successful' };
 	}
 }
 

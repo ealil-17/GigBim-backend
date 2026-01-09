@@ -23,6 +23,7 @@ model User {
   role      String   @default("user") @map("role")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime? @map("updated_at")
+  password  String?  @map("password")
   aiLogs    AiLog[]
 
   @@map("users")
